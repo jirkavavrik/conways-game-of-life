@@ -1,5 +1,5 @@
 #include <iostream> //cout and cin
-#include <cstdlib> //system(), srand(), rand()
+#include <cstdlib> //system(), srand(), rand(), exit(), atexit()
 #include <ctime> //time() for srand()
 
 //for sleeping function
@@ -18,6 +18,10 @@ char e = 32; //ascii of ' ' (space)
 
 short actual_state[256][256]; //actual cell state
 
+void error() {
+	cout << "---Sorry, but something went wrong :-(\n";
+}
+
 void cls() { //multiplatform clear screen
     #ifdef WIN32
         system("cls");
@@ -31,7 +35,7 @@ short check_life(short, short); //prototype of function for deciding whether cel
 int main()
 {
     srand(time(NULL)); //initialize random number generator
-
+	atexit(error); //for unusual exits
     entering_size: //label for returning to entering dialog when number is too large
     short field;
     cout << "\tArray size: ";
@@ -95,17 +99,18 @@ int main()
         sleep(1);
     #endif
     goto begin; //returning back
+
 }
 
-short check_life(short x, short y) {
+short check_life(short x, short y) { 
     short surr; //surrounding
 
     if(x == 0 && y == 0) { //left top corner etc.
         surr = actual_state[x+1][y] + actual_state[x+1][y+1] + actual_state[x][y+1];
     } else if (x == 0 && y != 0 && x != count_x) {
-        surr = actual_state[x-1][y] + actual_state[x-1][y+1] + actual_state[x][y+1] + actual_state[x+1][y+1] + actual_state[x][y+1];
+        surr = actual_state[x-1][y] + actual_state[x-1][y+1] + actual_state[x][y+1] + actual_state[x+1][y+1] + actual_state[x][y+1];//here are some errors to be fixed
     } else if(x == count_x && y == 0) {
-        surr = actual_state[x-1][y] + actual_state[x-1][y-1] + actual_state[x][y-1];
+        surr = actual_state[x-1][y] + actual_state[x-1][y-1] + actual_state[x][y-1]; //here are some errors to be fixed
     } else if(y > 0 && x == 0 && y < count_y) {
         surr = actual_state[x][y-1] + actual_state[x+1][y-1] + actual_state[x+1][y] + actual_state[x+1][y+1] + actual_state[x][y+1];
     } else if(x > 0 && y > 0 && x != count_x && y != count_y) {
@@ -119,6 +124,8 @@ short check_life(short x, short y) {
     } else if(x == count_x && y == count_y) {
         surr = actual_state[x-1][y] + actual_state[x-1][y-1] + actual_state[x][y-1];
     }
+	else
+		exit(EXIT_FAILURE);
 
     //according to wikipedia rules
     if (actual_state[x][y] == 1 && surr < 2)
@@ -129,4 +136,6 @@ short check_life(short x, short y) {
         return 0;
     else if(actual_state[x][y] == 0 && surr == 3)
         return 1;
+	else
+		exit(EXIT_FAILURE);
 }
