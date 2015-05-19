@@ -7,4 +7,3 @@ EXE=conway
 
 main: main.cpp
 	$(CC) $(FLAGS) -o $(EXE) main.cpp
-	./$(EXE)
