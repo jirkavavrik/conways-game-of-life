@@ -19,14 +19,14 @@ char e = 32; //ascii of ' ' (space)
 short actual_state[256][256]; //actual cell state
 
 void error() {
-	cout << "---Sorry, but something went wrong :-(\n";
+	cout << "--- Ooops! ---\n";
 }
 
 void cls() { //multiplatform clear screen
     #ifdef WIN32
-        if(!system("cls")) exit(EXIT_FAILURE);
+        if(system("cls")) exit(EXIT_FAILURE);
     #else
-        if(!system("clear")) exit(EXIT_FAILURE); //this is planned to be improved
+        if(system("clear")) exit(EXIT_FAILURE); //this is planned to be improved
     #endif
 }
 
@@ -122,8 +122,10 @@ short check_life(short x, short y) { //This is big sh*t, I know...
     } else if(x == count_x && y == count_y) { //lower right corner
         surr = actual_state[x-1][y] + actual_state[x-1][y-1] + actual_state[x][y-1];
     }
-	else
+	else {
+        cout << "Error during calculating surrounding\n";
 		exit(EXIT_FAILURE);
+    }
 
     //according to wikipedia rules
     if (actual_state[x][y] == 1 && surr < 2)
@@ -134,6 +136,10 @@ short check_life(short x, short y) { //This is big sh*t, I know...
         return 0;
     else if(actual_state[x][y] == 0 && surr == 3)
         return 1;
-	else
+    else if(actual_state[x][y] == 0 && surr != 3)
+        return 0;
+	else {
+        cout << "Error during calculating life\n";
 		exit(EXIT_FAILURE);
+    }
 }
