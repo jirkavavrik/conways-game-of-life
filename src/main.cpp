@@ -105,7 +105,7 @@ short check_life(short x, short y) { //This is big sh*t, I know...
 
     if(x == 0 && y == 0) { //left top corner
         surr = actual_state[x+1][y] + actual_state[x+1][y+1] + actual_state[x][y+1];
-    } else if (x == 0 && y != 0 && x != count_x) { //top edge
+    } else if (x > 0 && y == 0 && x != count_x) { //top edge
         surr = actual_state[x-1][y] + actual_state[x-1][y+1] + actual_state[x][y+1] + actual_state[x+1][y+1] + actual_state[x+1][y];
     } else if(x == count_x && y == 0) { //top right corner
         surr = actual_state[x-1][y] + actual_state[x-1][y+1] + actual_state[x][y+1];
