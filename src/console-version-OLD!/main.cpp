@@ -18,7 +18,7 @@ char e = 32; //ascii of ' ' (space)
 
 short actual_state[256][256]; //actual cell state
 
-void error() {
+void error() { //function to print when error occurs, or exiting with Ctrl+C
 	cout << "--- Ooops! ---\n";
 }
 
@@ -35,16 +35,23 @@ short check_life(short, short); //prototype of function for deciding whether cel
 int main()
 {
     srand(time(NULL)); //initialize random number generator
-	atexit(error); //for unusual exits
+	atexit(error); //for exits
     entering_size: //label for returning to entering dialog when number is too large
-        short field;
-        cout << "\tArray size: ";
-        cin >> field; //entering size of array
-        count_y = field; //array will be always rectangle, it's easier
-        count_x = field;
+        
+        cout << "Welcome to Jirka Vavrik's Conway's game of life simulator v1.0\n\tPlease enter width: ";
+        cin >> count_x;
+        cout << "\tPlease enter height: ";
+        cin >> count_y;
             if( count_x > 256 || count_y > 256) {
-            cout << "Number must not be more than 256!\n";
+            cout << "Number can't be more than 256!\n";
             goto entering_size; //return to entering
+        } else {
+            cout << "Thanks, the simulation shall begin!\n";
+            #ifdef WIN32
+                Sleep(1000);
+            #else
+                    sleep(1);
+            #endif
         }
 
     //random cell generating and savimg to actual state
