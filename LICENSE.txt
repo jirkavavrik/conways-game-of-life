@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2014 Jiøí Vavøík
+Copyright (c) 2014 JiÅ™Ã­ VavÅ™Ã­k
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
