@@ -1,23 +1,26 @@
+import javax.swing.JOptionPane; //error message box
+
 short count_x = 45;
 short count_y = 34;
 int[][] actualState = new int[50][50];
 int[][] nextState = new int[50][50];
 
 void setup() {
-  frame.setTitle("Jirka Vavřík's Conway's game of life simulator v2.0");
+  //frame.setIconImage( getToolkit().getImage("sketch.ico") ); //doesnt seem to work
+  frame.setTitle("Jiří Vavřík's Conway's game of life simulator v2.0.1");
   background(190);
   size(630, 500);
-  stroke(0);
-  line(0, 481, 630, 481);
-  PFont font;
+  stroke(0); //for bottom line
+  line(0, 481, 630, 481); //bottom line
+  
+  PFont font; //for text at bottom
   font = loadFont("FreeSansBold-14.vlw");
   textFont(font, 14);
   fill(111);
-  text("Made by Jirka Vavřík, 2014", 4, 496 );
+  text("Made by Jiří Vavřík, 2015", 4, 496 );
   
   //generate random cell states:
   randomSeed(System.currentTimeMillis()/1000);
-  
   for(short tmp_y = 0; tmp_y < count_y; tmp_y++) {
           for(short tmp_x = 0; tmp_x < count_x; tmp_x++) {
                int random = int(random(0, 2)); 
@@ -27,13 +30,11 @@ void setup() {
                     actualState[tmp_x][tmp_y] = 1;
                 }
             }
-        }
-  
-}
+        }//end of random generator
+}//end of setup
 
 void draw() {
   cleanCells();
-
   //render
   for(short y_ax = 0; y_ax < count_y; y_ax++) {
             for(short x_ax = 0; x_ax < count_x; x_ax++) {
@@ -59,18 +60,13 @@ void draw() {
             actualState[x_ax][y_ax] = nextState[x_ax][y_ax];
         }
     }
-    delay(250);
+    delay(500);
 }
 
-/*void error() {
-  PFont err;
-  err = loadFont("FreeSansBold-50.vlw");
-  textFont(err, 50);
-  fill(255, 0, 0);
-  text("Ooops! An error\n  has occured!", 120, 200 );
-  delay(5000);
+void error() {
+  JOptionPane.showMessageDialog(frame, "Ooops! An error has occured!", "Error", JOptionPane.ERROR_MESSAGE);
   exit();
-}*/
+}
 
 void cleanCells() { /* Function to clean the screen */
   stroke(0);
@@ -83,14 +79,12 @@ void cleanCells() { /* Function to clean the screen */
 }
 
 void delay(int mils) { /* delay function */
-  try
-  {    
+  try {    
     Thread.sleep(mils);
-  }
-  catch(Exception e){}
+  } catch(Exception e){}
 }
 
-int checkLife(int x, int y) { //This is big sh*t, I know...
+int checkLife(int x, int y) { //Read this function at your own risk
     int surr; //surrounding
 
     if(x == 0 && y == 0) { //left top corner
@@ -114,6 +108,7 @@ int checkLife(int x, int y) { //This is big sh*t, I know...
     }
   else {
         surr = -1;
+        error();
     }
 
     //according to wikipedia rules
@@ -128,6 +123,7 @@ int checkLife(int x, int y) { //This is big sh*t, I know...
     else if(actualState[x][y] == 0 && surr != 3)
         return int(0);
   else {
-        return -1;
+        error();
+        return -1; 
     }
 }
