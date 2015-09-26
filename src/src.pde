@@ -2,14 +2,14 @@ import javax.swing.JOptionPane; //error message box
 
 short count_x = 45;
 short count_y = 34;
-int[][] actualState = new int[50][50];
-int[][] nextState = new int[50][50];
+int[][] actualState = new int[46][35];
+int[][] nextState = new int[46][35];
 
 void setup() {
-  //frame.setIconImage( getToolkit().getImage("sketch.ico") ); //doesnt seem to work
-  frame.setTitle("Jiří Vavřík's Conway's game of life simulator v2.0.1");
-  background(190);
   size(630, 500);
+  //frame.setIconImage( getToolkit().getImage("sketch.ico") ); //didn't seem to work
+  surface.setTitle("Jiří Vavřík's Conway's game of life simulator v2.0.1.001");
+  background(190);
   stroke(0); //for bottom line
   line(0, 481, 630, 481); //bottom line
   
@@ -96,7 +96,7 @@ int checkLife(int x, int y) { //Read this function at your own risk
     } else if(y > 0 && x == 0 && y < count_y) { //left edge
         surr = actualState[x][y-1] + actualState[x+1][y-1] + actualState[x+1][y] + actualState[x+1][y+1] + actualState[x][y+1];
     } else if(x > 0 && y > 0 && x != count_x && y != count_y) { //middle
-        surr = actualState[x-1][y-1] + actualState[x][y-1] + actualState[x+1][y-1] + actualState[y][x+1] + actualState[y+1][x+1] + actualState[x][y+1] + actualState[x-1][y+1] + actualState[x-1][y];
+        surr = actualState[x-1][y-1] + actualState[x][y-1] + actualState[x+1][y-1] + actualState[x-1][y+1] + actualState[x+1][y+1] + actualState[x][y+1] + actualState[x+1][y] + actualState[x-1][y];
     } else if(x == count_x && y > 0 && y != count_y) { //right edge
         surr = actualState[x][y+1] + actualState[x-1][y+1] + actualState[x-1][y] + actualState[x-1][y-1] + actualState[x][y-1];
     } else if(x == 0 && y == count_y) { //lower left edge
