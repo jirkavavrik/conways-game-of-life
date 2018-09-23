@@ -6,7 +6,7 @@ CC=g++
 FLAGS=`sdl2-config --cflags --libs`
 EXE=conway
 
-main: conway.c++
-	$(CC) conway.c++ $(FLAGS) -o $(EXE)
+main: conway.cpp
+	$(CC) conway.cpp $(FLAGS) -o $(EXE)
 	./$(EXE)
 
