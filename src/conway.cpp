@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <iostream> //cout and cin
 #include <cstdlib> //system(), srand(), rand()
 #include <ctime> //time() for srand()
@@ -56,6 +56,7 @@ int previousCountY;
 	renderer = SDL_CreateRenderer(MainWindow,-1,SDL_RENDERER_ACCELERATED);//create renderer
 	
 	bool End = false;
+	bool Pause = false;
 	SDL_Event* event=new SDL_Event;//structure for handling events
 	SDL_Rect* rect = new SDL_Rect;
 	
@@ -63,51 +64,7 @@ int previousCountY;
 	while (!End)//main loop
 		{
 		
-		//check if there are still cells alive
-		int count = 0;
-		for(int i = 0; i < countX*countY; i++) {
-			if (currentState[i] == 1)
-				count++;
-		}
-		if(count == 0 && !deadCellsAlertShown) {
-			deadCellsAlertShown = true;
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                         "Cells died out",
-                         "All cells have died out, resizing the app window resets all cells",
-                         MainWindow);
-		}
-		
-		//render current state
-		for(short y_ax = 0; y_ax < countY; y_ax++) {
-            for(short x_ax = 0; x_ax < countX; x_ax++) {
-				 if(currentState[x_ax+y_ax*countX] == 1) {
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);//blue color
-                } else if(currentState[x_ax+y_ax*countX] == 0){
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);//white
-               }
-				rect->x = x_ax*14+2;	
-				rect->y = y_ax*14+2;
-				rect->w = 11;
-				rect->h = 11;
-				SDL_RenderFillRect(renderer, rect);//add rectangle to renderer
-            }
-        }
-		
-		SDL_RenderPresent(renderer); //update screen
-		
-		//calculate next state via checkLife();
-        for(short y_ax = 0; y_ax < countY; y_ax++) {
-			for(short x_ax = 0; x_ax < countX; x_ax++) {
-				nextState[x_ax+y_ax*countX] = checkLife(x_ax, y_ax);
-        }
-    }
-	
-		//changing present state to the future we calculated in previous step
-    for(short i = 0; i < countY*countX; i++) {
-            currentState[i] = nextState[i];
-    }
-	
-	
+
 	while (SDL_PollEvent(event)) {//read events from queue
 			
 			if (event->type == SDL_QUIT)
@@ -127,6 +84,7 @@ int previousCountY;
                          "Help",
                          infoMessage,
                          MainWindow); break;
+					case SDLK_PAUSE: if(Pause) Pause = false; else Pause = true; break;
 					case SDLK_q: End = true; break;
 					}
 
@@ -158,7 +116,53 @@ int previousCountY;
 						break;
 				}
 			}
+	}//end of reading event queue		
+
+
+	//check if there are still cells alive
+	int count = 0;
+	for(int i = 0; i < countX*countY; i++) {
+		if (currentState[i] == 1)
+			count++;
 	}
+	if(count == 0 && !deadCellsAlertShown) {
+		deadCellsAlertShown = true;
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+									"Cells died out",
+									"All cells have died out, resizing the app window resets all cells",
+									MainWindow);
+		}
+
+	if(!Pause){
+		//calculate next state vith checkLife();
+        for(short y_ax = 0; y_ax < countY; y_ax++) {
+			for(short x_ax = 0; x_ax < countX; x_ax++) {
+				nextState[x_ax+y_ax*countX] = checkLife(x_ax, y_ax);
+			}
+		}
+	
+		//changing present state to the future we calculated in previous step
+		for(short i = 0; i < countY*countX; i++) {
+            currentState[i] = nextState[i];
+		}
+	}
+
+		//render current state
+		for(short y_ax = 0; y_ax < countY; y_ax++) {
+            for(short x_ax = 0; x_ax < countX; x_ax++) {
+				 if(currentState[x_ax+y_ax*countX] == 1) {
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);//blue color
+                } else if(currentState[x_ax+y_ax*countX] == 0){
+                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);//white
+               }
+				rect->x = x_ax*14+2;	
+				rect->y = y_ax*14+2;
+				rect->w = 11;
+				rect->h = 11;
+				SDL_RenderFillRect(renderer, rect);//add rectangle to renderer
+            }
+        }
+	SDL_RenderPresent(renderer); //update screen
 	SDL_Delay(delay);
 	}//end of while loop
 
