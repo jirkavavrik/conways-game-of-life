@@ -208,7 +208,7 @@ char checkLife(short x, short y) {
 
      if(x == 0 && y == 0) { //left top corner
         surr = currentState[(x+1)+y*countX] + currentState[(x+1)+(y+1)*countX] + currentState[x+(y+1)*countX];
-    } else if (x > 0 && y == 0 && x < countX) { //top edge
+    } else if (x > 0 && y == 0 && x < countX-1) { //top edge
         surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y+1)*countX] + currentState[x+(y+1)*countX] + currentState[(x+1)+(y+1)*countX] + currentState[(x+1)+y*countX];
     } else if(x == countX-1 && y == countY-1) { //top right corner
         surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y+1)*countX] + currentState[x+(y+1)*countX];
