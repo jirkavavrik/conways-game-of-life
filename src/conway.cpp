@@ -7,9 +7,9 @@ known bugs:
 #include <cstdlib> //system(), srand(), rand()
 #include <ctime> //time() for srand()
 
-//size of window
-int windowX = 640;
-int windowY = 480;
+//size of window in pixels
+int windowXSize = 640;
+int windowYSize = 480;
 //size of cell matrix
 int countX = 45;
 int countY = 34;
@@ -21,7 +21,6 @@ char* nextState = (char*) malloc(countX*countY);
 int delay = 250;
 
 char checkLife(short, short); 
-void cls();
 void drawBackground();
 bool deadCellsAlertShown = false;
 
@@ -40,26 +39,35 @@ Wikipedia, The Free Encyclopedia, 21 Sep. 2018. Web. 23 Sep. 2018.)\n\
 
 int main(int argc, char* argv[])
 {
-int previousCountX;
-int previousCountY;
-	
+	int previousCountX;
+	int previousCountY;
 	srand(time(NULL)); //initialize random number generator
 	
 	//generate random zeros and ones  to currentState
 	for(short tmp_y = 0; tmp_y < countY; tmp_y++) {
-          for(short tmp_x = 0; tmp_x < countX; tmp_x++) {
-               short random = rand() % 2; 
-              if(random == 1) {
-                    currentState[tmp_x+tmp_y*countX] = 1;
+		for(short tmp_x = 0; tmp_x < countX; tmp_x++) {
+			short random = rand() % 2; 
+				if(random == 1) {
+					currentState[tmp_x+tmp_y*countX] = 1;
                 } else {
                     currentState[tmp_x+tmp_y*countX] = 0;
                 }
-            }
-        }
+		}
+    }
 	
 	SDL_Init(SDL_INIT_VIDEO);
-	SDL_Window* MainWindow = SDL_CreateWindow("Conway's game of life by Jiři Vavřík v3.2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowX, windowY, SDL_WINDOW_RESIZABLE); //create window
-	renderer = SDL_CreateRenderer(MainWindow,-1,SDL_RENDERER_ACCELERATED);//create renderer
+	SDL_Window* mainWindow = SDL_CreateWindow("Conway's game of life by Jiři Vavřík v3.2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowXSize, windowYSize, SDL_WINDOW_RESIZABLE); //create window
+	// Check that the window was successfully created
+    if (mainWindow == NULL) {
+        printf("Could not create window: %s\n", SDL_GetError());
+        return 1;
+    }
+	renderer = SDL_CreateRenderer(mainWindow,-1,SDL_RENDERER_ACCELERATED);//create renderer
+	// Check that the renderer was successfully created
+	if (renderer == NULL) {
+        printf("Could not create renderer: %s\n", SDL_GetError());
+        return 1;
+    }
 	
 	bool End = false;
 	bool Pause = false;
@@ -67,16 +75,10 @@ int previousCountY;
 	SDL_Rect* rect = new SDL_Rect;
 	
 	drawBackground();
-	while (!End)//main loop
-		{
-
-		
-
-	while (SDL_PollEvent(event)) {//read events from queue
-			
+	while (!End) {//main loop
+		while (SDL_PollEvent(event)) {//read events from queue
 			if (event->type == SDL_QUIT)
 				End = true;	
-
 			else if (event->type == SDL_KEYDOWN) { //if key is pressed
 				switch (event->key.keysym.sym) //choose the key
 				{
@@ -85,7 +87,7 @@ int previousCountY;
 									delay -= 10; std::cout << "Delay changed to " << delay << "ms\n"; break;
 					case SDLK_DOWN: //if down arrow is pressed, we increase delay (decrease speed)
 								delay += 10; std::cout << "Delay changed to " << delay << "ms\n"; break;
-					case SDLK_F1:		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", infoMessage, MainWindow); break;
+					case SDLK_F1:		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", infoMessage, mainWindow); break;
 					case SDLK_PAUSE: 	if(Pause) Pause = false; else Pause = true; break;
 					case SDLK_q:		End = true; break;
 					}
@@ -96,10 +98,10 @@ int previousCountY;
 						SDL_Log("Window %d resized to %dx%d", event->window.windowID, event->window.data1,	event->window.data2);
 						previousCountX = countX;
 						previousCountY = countY;
-						windowX = event->window.data1;
-						windowY = event->window.data2;
-						countX = int((windowX+2)/14);
-						countY = int((windowY+2)/14);
+						windowXSize = event->window.data1;
+						windowYSize = event->window.data2;
+						countX = int((windowXSize+2)/14);
+						countY = int((windowYSize+2)/14);
 						std::cout << countX << "  " << countY << std::endl;
 						currentState = (char*) realloc(currentState, countX*countY);
 						nextState = (char*) realloc(nextState, countX*countY);
@@ -116,8 +118,7 @@ int previousCountY;
 						deadCellsAlertShown = false;
 						break;
 				}
-			} else if (event->type == SDL_MOUSEBUTTONDOWN) {
-				//routinne for toggling individual cell state
+			} else if (event->type == SDL_MOUSEBUTTONDOWN) {//routinne for toggling individual cell state
 				int x,y;
 				SDL_GetMouseState(&x, &y);
 				if (event->button.button == SDL_BUTTON_LEFT) {
@@ -149,7 +150,6 @@ int previousCountY;
 			}//end of cell toggling routinne
 	}//end of reading event queue		
 
-
 	//check if there are still cells alive
 	int count = 0;
 	for(int i = 0; i < countX*countY; i++) {
@@ -158,23 +158,21 @@ int previousCountY;
 	}
 	if(count == 0 && !deadCellsAlertShown) {
 		deadCellsAlertShown = true;
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Cells died out", "All cells have died out, resizing the app window resets all cells", MainWindow);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Cells died out", "All cells have died out, resizing the app window resets all cells", mainWindow);
 		}
 
-	if(!Pause){
+	if(!Pause) {
 		//calculate next state vith checkLife();
-        for(short y_ax = 0; y_ax < countY; y_ax++) {
-			for(short x_ax = 0; x_ax < countX; x_ax++) {
+        for(short y_ax = 0; y_ax < countY-1; y_ax++) {
+			for(short x_ax = 0; x_ax < countX-1; x_ax++) {
 				nextState[x_ax+y_ax*countX] = checkLife(x_ax, y_ax);
 			}
 		}
-	
 		//changing present state to the future we calculated in previous step
 		for(short i = 0; i < countY*countX; i++) {
             currentState[i] = nextState[i];
 		}
 	}
-
 		//render current state
 		for(short y_ax = 0; y_ax < countY; y_ax++) {
             for(short x_ax = 0; x_ax < countX; x_ax++) {
@@ -205,7 +203,6 @@ void drawBackground() { //clear background
 
 char checkLife(short x, short y) {
     char surr; //surrounding
-
      if(x == 0 && y == 0) { //left top corner
         surr = currentState[(x+1)+y*countX] + currentState[(x+1)+(y+1)*countX] + currentState[x+(y+1)*countX];
     } else if (x > 0 && y == 0 && x < countX-1) { //top edge
