@@ -25,6 +25,9 @@ void drawBackground();
 bool deadCellsAlertShown = false;
 
 SDL_Renderer* renderer;
+SDL_Color color;
+enum colors {colorRed, colorGreen, colorBlue, colorYellow, colorCyan, colorMagenta};
+char currentColorCode = 2;
 
 const char* infoMessage = "The Game of Life, also known simply as Life, is a cellular automaton \n\
 devised by the British mathematician John Horton Conway in 1970.\n\
@@ -42,6 +45,7 @@ int main(int argc, char* argv[])
 	int previousCountX;
 	int previousCountY;
 	srand(time(NULL)); //initialize random number generator
+	color = {0,0,255,SDL_ALPHA_OPAQUE}; //default color blue
 	
 	//generate random zeros and ones  to currentState
 	for(short tmp_y = 0; tmp_y < countY; tmp_y++) {
@@ -80,8 +84,7 @@ int main(int argc, char* argv[])
 			if (event->type == SDL_QUIT)
 				End = true;	
 			else if (event->type == SDL_KEYDOWN) { //if key is pressed
-				switch (event->key.keysym.sym) //choose the key
-				{
+				switch (event->key.keysym.sym){ //choose the key
 					case SDLK_UP: //if up arrow is pressed, we decrease delay by 10ms, but protect it from overfowing and getting stuck
 								if(delay > 10)
 									delay -= 10; std::cout << "Delay changed to " << delay << "ms\n"; break;
@@ -90,6 +93,20 @@ int main(int argc, char* argv[])
 					case SDLK_F1:		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", infoMessage, mainWindow); break;
 					case SDLK_PAUSE: 	if(Pause) Pause = false; else Pause = true; break;
 					case SDLK_q:		End = true; break;
+					case SDLK_c:
+						if(currentColorCode < 5)
+							currentColorCode++;
+						else
+							currentColorCode = 0;
+						switch(currentColorCode){
+							case colorRed: 		color = {255, 0, 0, SDL_ALPHA_OPAQUE}; break;
+							case colorGreen:	color = {0, 255, 0, SDL_ALPHA_OPAQUE}; break;
+							case colorBlue:		color = {0, 0, 255, SDL_ALPHA_OPAQUE}; break;
+							case colorYellow:	color = {255, 255, 0, SDL_ALPHA_OPAQUE}; break;
+							case colorCyan:		color = {0, 255, 255, SDL_ALPHA_OPAQUE}; break;
+							case colorMagenta:	color = {255, 0, 255, SDL_ALPHA_OPAQUE}; break;
+						}
+						break;//add color changing code here
 					}
 
 			} else if (event->type == SDL_WINDOWEVENT) {
@@ -177,9 +194,9 @@ int main(int argc, char* argv[])
 		for(short y_ax = 0; y_ax < countY; y_ax++) {
             for(short x_ax = 0; x_ax < countX; x_ax++) {
 				 if(currentState[x_ax+y_ax*countX] == 1) {
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);//blue color
+                    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);//set color
                 } else if(currentState[x_ax+y_ax*countX] == 0){
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);//white
+                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);//white on empty cells
                }
 				rect->x = x_ax*14+2;	
 				rect->y = y_ax*14+2;
