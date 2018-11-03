@@ -36,12 +36,12 @@ Wikipedia, The Free Encyclopedia, 21 Sep. 2018. Web. 23 Sep. 2018.)\n\
 \tcontrols:\n\
 \tF1: show this info\n\
 \tArrows up and down: change speed of the game\n\
+\tC to change color of live cells\n\
 \tQ or Alt+F4 to quit\n\
 \tresize app window to change the playing area and/or to reset the game\n\
 ";
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
 	int previousCountX;
 	int previousCountY;
 	srand(time(NULL)); //initialize random number generator
@@ -63,19 +63,19 @@ int main(int argc, char* argv[])
 	SDL_Window* mainWindow = SDL_CreateWindow("Conway's game of life by Jiři Vavřík v3.2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowXSize, windowYSize, SDL_WINDOW_RESIZABLE); //create window
 	// Check that the window was successfully created
     if (mainWindow == NULL) {
-        printf("Could not create window: %s\n", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Could not create window: %s\n", SDL_GetError());
         return 1;
     }
 	renderer = SDL_CreateRenderer(mainWindow,-1,SDL_RENDERER_ACCELERATED);//create renderer
 	// Check that the renderer was successfully created
 	if (renderer == NULL) {
-        printf("Could not create renderer: %s\n", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Could not create renderer: %s\n", SDL_GetError());
         return 1;
     }
 	
 	bool End = false;
 	bool Pause = false;
-	SDL_Event* event=new SDL_Event;//structure for handling events
+	SDL_Event* event = new SDL_Event;//structure for handling events
 	SDL_Rect* rect = new SDL_Rect;
 	
 	drawBackground();
@@ -86,12 +86,25 @@ int main(int argc, char* argv[])
 			else if (event->type == SDL_KEYDOWN) { //if key is pressed
 				switch (event->key.keysym.sym){ //choose the key
 					case SDLK_UP: //if up arrow is pressed, we decrease delay by 10ms, but protect it from overfowing and getting stuck
-								if(delay > 10)
-									delay -= 10; std::cout << "Delay changed to " << delay << "ms\n"; break;
+						if(delay > 10){
+							delay -= 10;
+							SDL_Log("Delay changed to %i ms\n", delay);
+						}
+						break;
 					case SDLK_DOWN: //if down arrow is pressed, we increase delay (decrease speed)
-								delay += 10; std::cout << "Delay changed to " << delay << "ms\n"; break;
+						delay += 10;
+						SDL_Log("Delay changed to %i ms\n", delay); 
+						break;
 					case SDLK_F1:		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", infoMessage, mainWindow); break;
-					case SDLK_PAUSE: 	if(Pause) Pause = false; else Pause = true; break;
+					case SDLK_PAUSE:
+						if(Pause){
+							Pause = false;
+							SDL_Log("resuming game\n");
+						} else { 
+							Pause = true;
+							SDL_Log("game paused\n");
+						}
+						break;
 					case SDLK_q:		End = true; break;
 					case SDLK_c:
 						if(currentColorCode < 5)
@@ -106,6 +119,7 @@ int main(int argc, char* argv[])
 							case colorCyan:		color = {0, 255, 255, SDL_ALPHA_OPAQUE}; break;
 							case colorMagenta:	color = {255, 0, 255, SDL_ALPHA_OPAQUE}; break;
 						}
+						SDL_Log("color changed\n");
 						break;//add color changing code here
 					}
 
@@ -139,18 +153,17 @@ int main(int argc, char* argv[])
 				int x,y;
 				SDL_GetMouseState(&x, &y);
 				if (event->button.button == SDL_BUTTON_LEFT) {
-    					SDL_Log("Mouse Button 1 (left) is pressed.");std::cout << "mouse x: " << x << " mouse y: " << y << std::endl;
-					if(((x-2) % 14 <= 10 )&&( (y-2) % 14 <= 10 && (y-2)/14 < countY && (x-2)/14 < countX)) {//check if coordinates are on a cell
-						std::cout << "cell clicked\n";
-						std::cout << "cell " << (x-2)/14 << " " << (y-2)/14 << std::endl;
+    					SDL_Log("Mouse Button 1 (left) is pressed, mouse x: %i, mouse y: %i\n", x, y);
+					if(((x-2) % 14 <= 10 )&&( (y-2) % 14 <= 10 && (y-2)/14 < countY && (x-2)/14 < countX)) {//check if coordinates are on a cell, cell coordinates  x_pixels = x*14+2, the same with y
+						SDL_Log("cell clicked: cell x: %i, cell y: %i\n", (x-2)/14, (y-2)/14);
 						//toggle cell state
 						if(currentState[(x-2)/14 + (y-2)/14 * countX] == 1) {
-                    					SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);//white color
+                    		SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);//white color
 							currentState[(x-2)/14 + (y-2)/14 * countX] = 0;
-                				} else if(currentState[(x-2)/14 + (y-2)/14 * countX] == 0){
-							SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);//blue color
+                		} else if(currentState[(x-2)/14 + (y-2)/14 * countX] == 0){
+							SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 							currentState[(x-2)/14 + (y-2)/14 * countX] = 1;
-               					}
+               			}
 						rect->x = ((x-2)/14)*14+2;	
 						rect->y = ((y-2)/14)*14+2;
 						rect->w = 11;
@@ -240,7 +253,7 @@ char checkLife(short x, short y) {
         surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y-1)*countX] + currentState[x+(y-1)*countX];
     }
 	else {
-        std::cout << "Error during calculating surrounding\n";
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error during calculating surrounding\n");
 		exit(EXIT_FAILURE);
     }
 
@@ -256,7 +269,7 @@ char checkLife(short x, short y) {
     else if(currentState[x+y*countX] == 0 && surr != 3)
         return char(0);
 	else {
-        std::cout << "Error during calculating life " <<x<<" "<<y<< " "<<currentState[x+y*countX]<<" "<<surr<<std::endl;
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error during calculating life, x: %i, y: %i, currentState: %i, surrounding: %i\n", x, y, currentState[x+y*countX], surr);
 		exit(EXIT_FAILURE);
     }
 }

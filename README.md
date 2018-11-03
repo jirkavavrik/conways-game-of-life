@@ -22,4 +22,4 @@ Linux build: (also works on Cygwin)
 1. install libSDL2-dev - either as a package or from https://www.libsdl.org/download-2.0.php
 2. enter the 'src' directory
 3. `make`
-4. if the build has been successfull, game of life will run immediatelly
+4. run with `make run`

@@ -8,5 +8,6 @@ EXE=conway
 
 main: conway.cpp
 	$(CC) conway.cpp $(FLAGS) -o $(EXE)
-	./$(EXE)
 
+run:
+	./$(EXE)
