@@ -150,22 +150,24 @@ int main(int argc, char* argv[]) {
 						break;
 				}
 			} else if (event->type == SDL_MOUSEBUTTONDOWN) {//routinne for toggling individual cell state
-				int x,y;
+				int x, y, cellX, cellY = 0;
 				SDL_GetMouseState(&x, &y);
+				cellX = (x-2)/14; //cell coordinates: x_pixels = x*14+2, the same with y
+				cellY = (y-2)/14;
 				if (event->button.button == SDL_BUTTON_LEFT) {
     					SDL_Log("Mouse Button 1 (left) is pressed, mouse x: %i, mouse y: %i\n", x, y);
-					if(((x-2) % 14 <= 10 )&&( (y-2) % 14 <= 10 && (y-2)/14 < countY && (x-2)/14 < countX)) {//check if coordinates are on a cell, cell coordinates  x_pixels = x*14+2, the same with y
-						SDL_Log("cell clicked: cell x: %i, cell y: %i\n", (x-2)/14, (y-2)/14);
+					if(((x-2) % 14 <= 10 )&&( (y-2) % 14 <= 10 && cellY < countY && cellX < countX)) {//check if coordinates are on a cell
+						SDL_Log("cell clicked: cell x: %i, cell y: %i\n", cellX, cellY);
 						//toggle cell state
-						if(currentState[(x-2)/14 + (y-2)/14 * countX] == 1) {
+						if(currentState[cellX + cellY * countX] == 1) {
                     		SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);//white color
-							currentState[(x-2)/14 + (y-2)/14 * countX] = 0;
-                		} else if(currentState[(x-2)/14 + (y-2)/14 * countX] == 0){
+							currentState[cellX + cellY * countX] = 0;
+                		} else if(currentState[cellX + cellY * countX] == 0){
 							SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-							currentState[(x-2)/14 + (y-2)/14 * countX] = 1;
+							currentState[cellX + cellY * countX] = 1;
                			}
-						rect->x = ((x-2)/14)*14+2;	
-						rect->y = ((y-2)/14)*14+2;
+						rect->x = cellX*14+2;	
+						rect->y = cellY*14+2;
 						rect->w = 11;
 						rect->h = 11;
 						SDL_RenderFillRect(renderer, rect);//add rectangle to renderer
