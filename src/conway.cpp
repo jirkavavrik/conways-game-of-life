@@ -1,7 +1,3 @@
-/*
-known bugs:
--none
-*/
 #include <SDL.h>
 #include <iostream> //cout and cin
 #include <cstdlib> //system(), srand(), rand()
@@ -13,7 +9,6 @@ int windowYSize = 480;
 //size of cell matrix
 int countX = 45;
 int countY = 34;
-
 //arrays storing the cells
 char* currentState = (char*) malloc(countX*countY);
 char* nextState = (char*) malloc(countX*countY);
@@ -26,7 +21,7 @@ bool deadCellsAlertShown = false;
 
 SDL_Renderer* renderer;
 SDL_Color color;
-enum colors {colorRed, colorGreen, colorBlue, colorYellow, colorCyan, colorMagenta};
+enum colors {colorRed, colorGreen, colorBlue, colorOrange, colorTurqoise, colorMagenta, colorBlack};
 char currentColorCode = 2;
 
 const char* infoMessage = "The Game of Life, also known simply as Life, is a cellular automaton \n\
@@ -58,7 +53,6 @@ int main(int argc, char* argv[]) {
                 }
 		}
     }
-	
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_Window* mainWindow = SDL_CreateWindow("Conway's game of life by Jiři Vavřík v3.2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowXSize, windowYSize, SDL_WINDOW_RESIZABLE); //create window
 	// Check that the window was successfully created
@@ -107,7 +101,7 @@ int main(int argc, char* argv[]) {
 						break;
 					case SDLK_q:		End = true; break;
 					case SDLK_c:
-						if(currentColorCode < 5)
+						if(currentColorCode < 6)
 							currentColorCode++;
 						else
 							currentColorCode = 0;
@@ -115,14 +109,14 @@ int main(int argc, char* argv[]) {
 							case colorRed: 		color = {255, 0, 0, SDL_ALPHA_OPAQUE}; break;
 							case colorGreen:	color = {0, 255, 0, SDL_ALPHA_OPAQUE}; break;
 							case colorBlue:		color = {0, 0, 255, SDL_ALPHA_OPAQUE}; break;
-							case colorYellow:	color = {255, 255, 0, SDL_ALPHA_OPAQUE}; break;
-							case colorCyan:		color = {0, 255, 255, SDL_ALPHA_OPAQUE}; break;
+							case colorOrange:	color = {255, 165, 0, SDL_ALPHA_OPAQUE}; break;
+							case colorTurqoise:	color = {50, 198, 166, SDL_ALPHA_OPAQUE}; break;
 							case colorMagenta:	color = {255, 0, 255, SDL_ALPHA_OPAQUE}; break;
+							case colorBlack:	color = {0, 0, 0, SDL_ALPHA_OPAQUE}; break;
 						}
 						SDL_Log("color changed\n");
 						break;//add color changing code here
 					}
-
 			} else if (event->type == SDL_WINDOWEVENT) {
 				switch (event->window.event) {
 					case SDL_WINDOWEVENT_RESIZED:
@@ -156,7 +150,7 @@ int main(int argc, char* argv[]) {
 				cellY = (y-2)/14;
 				if (event->button.button == SDL_BUTTON_LEFT) {
     					SDL_Log("Mouse Button 1 (left) is pressed, mouse x: %i, mouse y: %i\n", x, y);
-					if(((x-2) % 14 <= 10 )&&( (y-2) % 14 <= 10 && cellY < countY && cellX < countX)) {//check if coordinates are on a cell
+					if(((x-2) % 14 <= 10 )&&( (y-2) % 14 <= 10) && cellY < countY && cellX < countX) {//check if coordinates are on a cell
 						SDL_Log("cell clicked: cell x: %i, cell y: %i\n", cellX, cellY);
 						//toggle cell state
 						if(currentState[cellX + cellY * countX] == 1) {
@@ -173,66 +167,62 @@ int main(int argc, char* argv[]) {
 						SDL_RenderFillRect(renderer, rect);//add rectangle to renderer
 						SDL_RenderPresent(renderer); //update screen
 						while(true){//wait until mouse button is released
-							SDL_PollEvent(event);
+							SDL_WaitEvent(event);
 							if(event->type == SDL_MOUSEBUTTONUP)
 								break;
 						}
 					}
 				}
 			}//end of cell toggling routinne
-	}//end of reading event queue		
-
-	//check if there are still cells alive
-	int count = 0;
-	for(int i = 0; i < countX*countY; i++) {
-		if (currentState[i] == 1)
-			count++;
-	}
-	if(count == 0 && !deadCellsAlertShown) {
-		deadCellsAlertShown = true;
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Cells died out", "All cells have died out, resizing the app window resets all cells", mainWindow);
+		}//end of reading event queue
+		//check if there are still cells alive
+		int count = 0;
+		for(int i = 0; i < countX*countY; i++) {
+			if (currentState[i] == 1)
+				count++;
 		}
-
-	if(!Pause) {
-		//calculate next state vith checkLife();
-        for(short y_ax = 0; y_ax < countY-1; y_ax++) {
-			for(short x_ax = 0; x_ax < countX-1; x_ax++) {
-				nextState[x_ax+y_ax*countX] = checkLife(x_ax, y_ax);
+		if(count == 0 && !deadCellsAlertShown) {
+			deadCellsAlertShown = true;
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Cells died out", "All cells have died out, resizing the app window resets all cells", mainWindow);
+		}
+		if(!Pause) {
+			//calculate next state vith checkLife();
+			for(short y_ax = 0; y_ax < countY-1; y_ax++) {
+				for(short x_ax = 0; x_ax < countX-1; x_ax++) {
+					nextState[x_ax+y_ax*countX] = checkLife(x_ax, y_ax);
+				}
+			}
+			//changing present state to the future we calculated in previous step
+			for(short i = 0; i < countY*countX; i++) {
+				currentState[i] = nextState[i];
 			}
 		}
-		//changing present state to the future we calculated in previous step
-		for(short i = 0; i < countY*countX; i++) {
-            currentState[i] = nextState[i];
-		}
-	}
 		//render current state
 		for(short y_ax = 0; y_ax < countY; y_ax++) {
-            for(short x_ax = 0; x_ax < countX; x_ax++) {
-				 if(currentState[x_ax+y_ax*countX] == 1) {
-                    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);//set color
-                } else if(currentState[x_ax+y_ax*countX] == 0){
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);//white on empty cells
-               }
+			for(short x_ax = 0; x_ax < countX; x_ax++) {
+				if(currentState[x_ax+y_ax*countX] == 1) {
+					SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);//set color
+				} else if(currentState[x_ax+y_ax*countX] == 0){
+					SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);//white on empty cells
+				}
 				rect->x = x_ax*14+2;	
 				rect->y = y_ax*14+2;
 				rect->w = 11;
 				rect->h = 11;
 				SDL_RenderFillRect(renderer, rect);//add rectangle to renderer
-            }
-        }
-	SDL_RenderPresent(renderer); //update screen
-	SDL_Delay(delay);
+				}
+			}
+		SDL_RenderPresent(renderer); //update screen
+		SDL_Delay(delay);
 	}//end of while loop
 
 	SDL_Quit();
 	return 0;
 }//end of main
-
 void drawBackground() { //clear background
 	SDL_SetRenderDrawColor(renderer, 127, 127, 127, SDL_ALPHA_OPAQUE);//background gray color
 	SDL_RenderFillRect(renderer, NULL);
 }
-
 char checkLife(short x, short y) {
     char surr; //surrounding
      if(x == 0 && y == 0) { //left top corner
@@ -258,7 +248,6 @@ char checkLife(short x, short y) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error during calculating surrounding\n");
 		exit(EXIT_FAILURE);
     }
-
     //according to wikipedia rules
     if (currentState[x+y*countX] == 1 && surr < 2)
         return char(0);
