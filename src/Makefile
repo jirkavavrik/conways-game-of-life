@@ -1,6 +1,6 @@
 # Project: Conway's game of life simulator by Jiří Vavřík
 # Autor:   Jiří Vavřík
-# Datum:   31. 1. 2016
+# Date:   4. 11. 2018
 
 CC=g++
 FLAGS=`sdl2-config --cflags --libs`
