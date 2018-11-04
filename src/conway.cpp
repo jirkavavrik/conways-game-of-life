@@ -43,8 +43,8 @@ int main(int argc, char* argv[]) {
 	color = {0,0,255,SDL_ALPHA_OPAQUE}; //default color blue
 	
 	//generate random zeros and ones  to currentState
-	for(short tmp_y = 0; tmp_y < countY; tmp_y++) {
-		for(short tmp_x = 0; tmp_x < countX; tmp_x++) {
+	for(short tmp_y = 0; tmp_y < countY-1; tmp_y++) {
+		for(short tmp_x = 0; tmp_x < countX-1; tmp_x++) {
 			short random = rand() % 2; 
 				if(random == 1) {
 					currentState[tmp_x+tmp_y*countX] = 1;
@@ -81,16 +81,16 @@ int main(int argc, char* argv[]) {
 				switch (event->key.keysym.sym){ //choose the key
 					case SDLK_UP: //if up arrow is pressed, we decrease delay by 10ms, but protect it from overfowing and getting stuck
 						if(delay > 10){
-							delay -= 10;
+							delay -= delay/10;
 							SDL_Log("Delay changed to %i ms\n", delay);
 						}
 						break;
 					case SDLK_DOWN: //if down arrow is pressed, we increase delay (decrease speed)
-						delay += 10;
+						delay += delay/10;
 						SDL_Log("Delay changed to %i ms\n", delay); 
 						break;
 					case SDLK_F1:		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", infoMessage, mainWindow); break;
-					case SDLK_PAUSE:
+					case SDLK_PAUSE: case SDLK_SPACE:
 						if(Pause){
 							Pause = false;
 							SDL_Log("resuming game\n");
@@ -187,8 +187,8 @@ int main(int argc, char* argv[]) {
 		}
 		if(!Pause) {
 			//calculate next state vith checkLife();
-			for(short y_ax = 0; y_ax < countY-1; y_ax++) {
-				for(short x_ax = 0; x_ax < countX-1; x_ax++) {
+			for(short y_ax = 0; y_ax <= countY-1; y_ax++) {
+				for(short x_ax = 0; x_ax <= countX-1; x_ax++) {
 					nextState[x_ax+y_ax*countX] = checkLife(x_ax, y_ax);
 				}
 			}
@@ -198,8 +198,8 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		//render current state
-		for(short y_ax = 0; y_ax < countY; y_ax++) {
-			for(short x_ax = 0; x_ax < countX; x_ax++) {
+		for(short y_ax = 0; y_ax <= countY-1; y_ax++) {
+			for(short x_ax = 0; x_ax <= countX-1; x_ax++) {
 				if(currentState[x_ax+y_ax*countX] == 1) {
 					SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);//set color
 				} else if(currentState[x_ax+y_ax*countX] == 0){
@@ -229,20 +229,20 @@ char checkLife(short x, short y) {
         surr = currentState[(x+1)+y*countX] + currentState[(x+1)+(y+1)*countX] + currentState[x+(y+1)*countX];
     } else if (x > 0 && y == 0 && x < countX-1) { //top edge
         surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y+1)*countX] + currentState[x+(y+1)*countX] + currentState[(x+1)+(y+1)*countX] + currentState[(x+1)+y*countX];
-    } else if(x == countX-1 && y == countY-1) { //top right corner
-        surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y+1)*countX] + currentState[x+(y+1)*countX];
+	} else if(x == countX-1 && y == 0) { //upper right corner
+        surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y-1)*countX] + currentState[x+(y-1)*countX];
+	} else if(x == countX-1 && y > 0 && y < countY-1) { //right edge
+        surr = currentState[x+(y+1)*countX] + currentState[(x-1)+(y+1)*countX] + currentState[(x-1)+y*countX] + currentState[(x-1)+(y-1)*countX] + currentState[x+(y-1)*countX];
+    } else if(x == countX-1 && y == countY-1) { //lower right corner
+        surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y-1)*countX] + currentState[x+(y-1)*countX];
+	} else if(x > 0 && x < countX-1 && y == countY-1) { //lower edge
+        surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y-1)*countX] + currentState[x+(y-1)*countX] + currentState[(x+1)+(y-1)*countX] + currentState[(x+1)+y*countX];
+	} else if(x == 0 && y == countY-1) { //lower left corner
+        surr = currentState[x+(y-1)*countX] + currentState[(x+1)+(y-1)*countX] + currentState[(x+1)+y*countX];
     } else if(y > 0 && x == 0 && y < countY-1) { //left edge
         surr = currentState[x+(y-1)*countX] + currentState[(x+1)+(y-1)*countX] + currentState[(x+1)+y*countX] + currentState[(x+1)+(y+1)*countX] + currentState[x+(y+1)*countX];
     } else if(x > 0 && y > 0 && x < countX-1 && y < countY-1) { //middle
         surr = currentState[(x-1)+(y-1)*countX] + currentState[x+(y-1)*countX] + currentState[(x+1)+(y-1)*countX] + currentState[(x-1)+(y+1)*countX] + currentState[(x+1)+(y+1)*countX] + currentState[x+(y+1)*countX] + currentState[(x+1)+y*countX] + currentState[(x-1)+y*countX];
-    } else if(x == countX-1 && y > 0 && y < countY-1) { //right edge
-        surr = currentState[x+(y+1)*countX] + currentState[(x-1)+(y+1)*countX] + currentState[(x-1)+y*countX] + currentState[(x-1)+(y-1)*countX] + currentState[x+(y-1)*countX];
-    } else if(x == 0 && y == countY-1) { //lower left corner
-        surr = currentState[x+(y-1)*countX] + currentState[(x+1)+(y-1)*countX] + currentState[(x+1)+y*countX];
-    } else if(x > 0 && x < countX-1 && y == countY-1) { //lower edge
-        surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y-1)*countX] + currentState[x+(y-1)*countX] + currentState[(x+1)+(y-1)*countX] + currentState[(x+1)+y*countX];
-    } else if(x == countX-1 && y == countY-1) { //lower right corner
-        surr = currentState[(x-1)+y*countX] + currentState[(x-1)+(y-1)*countX] + currentState[x+(y-1)*countX];
     }
 	else {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error during calculating surrounding\n");
